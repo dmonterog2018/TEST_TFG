@@ -42,3 +42,41 @@ def generate_initial_population(items: List[Item], capacity: int, size: int) -> 
         chromosome = [random.randint(0, 1) for _ in items]
         population.append(Individual(chromosome, items, capacity))
     return population
+
+def genetic_algorithm(items: List[Item], capacity: int, generations: int, population_size: int, mutation_rate: float) -> Tuple[Individual, int]:
+    population = generate_initial_population(items, capacity, population_size)
+    best = max(population, key=lambda ind: ind.fitness)
+
+    for generation in range(generations):
+        new_population = []
+        for _ in range(population_size):
+            parent1 = selection(population)
+            parent2 = selection(population)
+            child = crossover(parent1, parent2)
+            child.mutate(mutation_rate)
+            new_population.append(child)
+        population = new_population
+        current_best = max(population, key=lambda ind: ind.fitness)
+        if current_best.fitness > best.fitness:
+            best = current_best
+
+    return best, best.fitness
+
+if __name__ == "__main__":
+    items = [
+        Item("Laptop", 3, 2000),
+        Item("Headphones", 1, 250),
+        Item("Coffee Mug", 1, 50),
+        Item("Notepad", 2, 300),
+        Item("Smartphone", 1, 1500),
+        Item("Book", 2, 500)
+    ]
+    capacity = 5
+    best_solution, best_value = genetic_algorithm(
+        items, capacity, generations=100, population_size=30, mutation_rate=0.05
+    )
+
+    print("Best solution value:", best_value)
+    for gene, item in zip(best_solution.chromosome, items):
+        if gene:
+            print(f" - {item.name} (value: {item.value}, weight: {item.weight})")
